@@ -1,0 +1,5 @@
+extract_msg==0.36.4
+pandas==1.5.1
+requests==2.25.1
+streamlit==1.17.0
+streamlit_option_menu==0.3.2
