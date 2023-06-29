@@ -1,0 +1,6 @@
+flask
+pygal
+IPy
+geoip2
+python-dateutil
+gunicorn

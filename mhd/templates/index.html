@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="{{url_for('static', filename='imgs/detective.png')}}">
+    <title> MHD </title>
+    <link href="{{url_for('static', filename='css/bootstrap.min.css')}}" rel="stylesheet">
+    <link href="{{url_for('static', filename='css/ie10-viewport-bug-workaround.css')}}" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Robotodisplay=swap" rel="stylesheet">
+    <link href="{{url_for('static', filename='css/starter-template.css')}}" rel="stylesheet">
+    <script src="{{url_for('static', filename='js/ie-emulation-modes-warning.js')}}"></script>
+    <link href="{{url_for('static', filename='css/bootstrap-table.min.css')}}" rel="stylesheet">
+    <link href="{{url_for('static', filename='css/flag-sprites.min.css')}}" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.13.0/css/all.css" integrity="sha384-Bfad6CLCknfcloXFOyFnlgtENryhrpZCe29RTifKEixXQZ38WheV+i/6YWSzkz3V" crossorigin="anonymous">
+</head>
+
+<body> 
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                    aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">Mail Header Detective <small>(MHD)</small></a>
+            </div>
+            <div id="navbar" class="collapse navbar-collapse">
+                <ul class="nav navbar-nav">
+                    <li class="active"><a href="/">Analysis</a></li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right icons">
+                    <li><a href="https://github.com/akajhon" target="_blank"><i class="fab fa-github fa-lg"></i></a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="container-fluid" style="padding-top: 50px;">
+        {% if data %}
+        <p> <b> Analysis for: </b> {{ summary.Subject }} </p>
+        <br>
+        <div class="well well-lg">
+            <div class="row" style="padding-top: 15px;">
+                <div class="col-md-6">
+                    <dl class="dl-horizontal">
+                        <dt>Subject</dt>
+                        <dd>{{ summary.Subject }}</dd>
+                        <dt>Message-ID</dt>
+                        <dd>{{ summary.MessageID }}</dd>
+                        <dt>Creation time (Date)</dt>
+                        <dd>{{ summary.Date }}</dd>
+                        <dt>From</dt>
+                        <dd>{{ summary.From }}</dd>
+                        <dt>To</dt>
+                        <dd>{{ summary.To }}</dd>
+                        {% if summary.Cc %}
+                        <dt>Cc</dt>
+                        <dd>{{ summary.Cc }}</dd>
+                        {% endif %}
+                    </dl>
+                </div>
+                {% if delayed %}
+                <div class="col-md-6">
+                    {# <div id="chart_div"></div>#}
+                    {{ chart|safe }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        <table id="table" data-toggle="table" data-search="true" data-show-columns="true" data-striped="true"
+            data-show-toggle="true" data-show-refresh="true" data-page-size="13" data-sort-name="hop"
+            data-sort-order="asc">
+            <thead style="background-color: #333333;color:#d4d4d4;">
+                <tr>
+                    <th data-field="hop" data-sortable="true">Hop</th>
+                    <th data-sortable="true">From</th>
+                    <th data-sortable="true">By</th>
+                    <th data-sortable="true">With</th>
+                    <th data-sortable="true">Time (UTC)</th>
+                    <th data-sortable="true">Delay</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for k, v in data.items() %}
+                <tr>
+                    <td>{{ k }}</td>
+                    <td>{{ v.Direction.0 }}{% if country(v.Direction.0).iso_code %}<span class="pull-right"><a href="#"
+                                data-toggle="tooltip" data-placement="top"
+                                title="{{country(v.Direction.0).country_name}}"><i
+                                    class="flag flag-{{country(v.Direction.0).iso_code}}"></i></a></span>{% endif %}
+                    </td>
+                    <td>{{ v.Direction.1 }}{% if country(v.Direction.1).iso_code %}<span class="pull-right"><a href="#"
+                                data-toggle="tooltip" data-placement="top"
+                                title="{{country(v.Direction.1).country_name}}"><i
+                                    class="flag flag-{{country(v.Direction.1).iso_code}}"></i></a></span>{% endif %}
+                    </td>
+                    <td>{{ v.Direction.2 }}</td>
+                    <td>{{ v.Time }}</td>
+                    <td>
+                        {% if duration(v.Delay) %} {{ duration(v.Delay) }} {% else %} {% if loop.first %} *
+                        {% else %}0{% endif %} {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <br>
+        <div class="panel panel-default" style="margin-top: 10px;">
+            <div class="panel-heading">
+                <h3 class="panel-title">Security Headers</h3>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    {% for k, v in n.items() %}
+                        {% if k in security_headers %}
+                            <tr>
+                                <th>{{ k }}</th>
+                                <td>{{ v }}</td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+        <div class="panel panel-default" style="margin-top: 10px;">
+            <div class="panel-heading">
+                <h3 class="panel-title">Sender Domain Security Check</h3>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <tr>
+                        <th>Sender Domain SPF Record</th>
+                        <td>{{ spf_record }}</td>
+                    </tr>
+                    <tr>
+                        <th>Sender Domain DMARC Record</th>
+                        <td>{{ dmarc_record }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="panel panel-default" style="margin-top: 10px;">
+            <div class="panel-heading">
+                <h3 class="panel-title">X- headers</h3>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    {% for k,v in n.items() %}
+                    {% if k.startswith('X-') %}
+                    <tr>
+                        <th>{{ k }}</th>
+                        <td>{{ v }}</td>
+                    </tr>
+                    {% endif %} {% endfor %}
+                </table>
+            </div>
+        </div>
+        <div class="panel panel-default" style="margin-top: 10px;">
+            <div class="panel-heading">
+                <h3 class="panel-title">Other headers</h3>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    {% for k,v in n.items() %}
+                    {% if k not in ['Received','Subject','From','To','Message-ID','CC','Date'] and k not in security_headers and not k.startswith('X-') %}
+                    <tr>
+                        <th>{{ k }}</th>
+                        <td>{{ v }}</td>
+                    </tr>
+                    {% endif %} {% endfor %}
+                </table>
+            </div>
+        </div>
+        <div class="panel panel-default" style="margin-top: 10px;">
+    <div class="panel-heading">
+        <h3 class="panel-title">Attachments</h3>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Filename</th>
+                    <th>Content-Type</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if attachments %}
+                {% for attachment in attachments %}
+                <tr>
+                    <td>{{ attachment.filename }}</td>
+                    <td>{{ attachment.content_type }}</td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="2">No attachments found</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+        <div class="panel panel-default" style="margin-top: 10px;">
+            <div class="panel-heading">
+                <h3 class="panel-title">External IP Addresses Found</h3>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>IP</th>
+                            <th>AbuseIPDB</th>
+                            <th>IPQualityScore</th>
+                            <th>VirusTotal</th>
+                            <th>Maltiverse</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if ip_data %}
+                            {% for ip, data in ip_data.items() %}
+                                <tr>
+                                    <td>{{ ip }}</td>
+                                    <td>{{ data.abuseipdb }}</td>
+                                    <td>{{ data.ipqualityscore }}</td>
+                                    <td>{{ data.vt }}</td>
+                                    <td>{{ data.maltiverse }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="5">External IP Addresses not found</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="panel panel-default" style="margin-top: 10px;">
+            <div class="panel-heading">
+                <h3 class="panel-title">Email Addresses Found</h3>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Email</th>
+                            <th>IPQualityScore</th>
+                            <th>Hunter.io</th>
+                        </tr>
+                        <tbody>
+                            {% if email_addresses %}
+                                {% for email, data in email_data.items() %}
+                                    <tr>
+                                        <td>{{ email }}</td>
+                                        <td>{{ data.ipqualityscore }}</td>
+                                        <td>{{ data.hunterio }}</td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="5">Email Addresses not found</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        <div class="panel panel-default" style="margin-top: 10px;">
+            <div class="panel-heading">
+                <h3 class="panel-title">URLs Found</h3>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Email</th>
+                            <th>VirusTotal</th>
+                            <th>Phishtank</th>
+                            <th>Maltiverse</th>
+                        </tr>
+                        <tbody>
+                            {% if urls_found %}
+                                {% for url, data in url_data.items() %}
+                                    <tr>
+                                        <td>{{ url }}</td>
+                                        <td>{{ data.vt }}</td>
+                                        <td>{{ data.phishtank }}</td>
+                                        <td>{{ data.maltiverse }}</td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="5">URLs not found</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                </table>
+            </div>
+        </div>
+        <br>
+        <p><b>Remember to: </b>Always double-check the results provided by the API's.</p>
+        {% else %}
+        <div class="row">
+            <div class="col-md-12">
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="col-md-12">
+                        <p>
+                            <b>"Mail Header Detective"</b> is a comprehensive tool developed using the Flask framework, specifically designed to parse and interpret email headers into a format that's easily understood by humans. Leveraging the power of this tool, users can unlock valuable insights from raw email data. Key features of the MHD include:
+                        </p>
+                        <ul>
+                            <li>Hop Delay Identification: The tool analyzes the timestamp data in the email header to compute the delay between each hop. This can help in identifying any abnormal delays or potential issues in the email delivery process.</li>
+                            
+                            <li>Email Source Identification: One of the key features of this tool is its ability to trace back the origin of an email. By carefully analyzing the "Received" fields in the email header, the tool is able to identify the IP address and consequently the server from which the email originated.</li>
+                        
+                            <li>Country Identification: Building upon the source identification feature, the tool can also pinpoint the geographical location of the email's origin by mapping the IP address to its country. This can be particularly useful in identifying spam emails or in digital forensics investigations.</li>
+
+                            <li>API Integrations: MHD can identify IP Adresses, Email adresses and URL's on the e-mail metadata and send them to services such as VirusTotal, Hunter.io, Maltiverse, CheckPhish, Pishtank and others, for a detailed analysis.</li> 
+                        </ul>
+                        <p>
+                            In essence, the "Mail Header Detective" is a powerful tool that can aid in dissecting complex email headers, providing useful insights and valuable information about the email's journey from the sender to the recipient.
+                        </p>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <br>
+                            <label for="headers"> Drop your .eml/.msg file here: </label>
+                            <input type="file" name="headers" id="headers" class="form-control" placeholder="Drop your .eml/.msg file here" accept=".msg, .eml" autofocus required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg btn-block btn-magenta" onclick="submitForm();">Analyze The Email!</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+        <br>
+        <div id="loading" class="position-fixed top-50 start-50 translate-middle text-center" style="display: none;">
+            <img src="/static/imgs/loading.gif">
+            <br>
+            <br>
+            <p><b>Analysing the E-mail provided...</b></p>
+        </div>
+        </div>
+    <script src="{{url_for('static', filename='js/jquery.min.js')}}"></script>
+    <script src="{{url_for('static', filename='js/bootstrap.min.js')}}"></script>
+    <script src="{{url_for('static', filename='js/ie10-viewport-bug-workaround.js')}}"></script>
+    <script src="{{url_for('static', filename='js/bootstrap-table.min.js')}}"></script>
+    <script src="{{url_for('static', filename='js/pygal-tooltips.min.js')}}"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+    </script>
+    <script>
+        function submitForm() {
+        document.getElementById('loading').style.display = 'block';
+        fetch('/', {
+            method: 'POST',
+            body: new FormData(document.getElementById('yourFormId')),
+        })
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('loading').style.display = 'none';
+        }); 
+        }
+    </script>
+</body>
+
+</html>

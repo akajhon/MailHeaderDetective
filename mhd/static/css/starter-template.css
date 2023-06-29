@@ -1,0 +1,34 @@
+body {
+  padding-top: 50px;
+  font-family: 'Roboto' sans-serif;
+  font-size: 16px;
+}
+.starter-template {
+  padding: 40px 15px;
+  text-align: center;
+  font-family: 'Roboto' sans-serif;
+}
+
+.icons {
+  padding-right: 13px;
+  font-size: large;
+}
+.icons>li>a{
+  padding-top: 15px  !important;
+  padding-bottom: 15px  !important;
+  padding: 10px 8px;
+}
+
+.btn-magenta {
+  background-color: #ee0074;
+  border-color: #ee0074;
+  color: #fff;
+  font-family: 'Roboto' sans-serif;
+}
+
+.btn-magenta:hover {
+  background-color: #ff3d8f;
+  border-color: #ff3d8f;
+  color: #fff;
+  font-family: 'Roboto' sans-serif;
+}

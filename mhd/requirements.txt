@@ -1,0 +1,11 @@
+dnspython==2.3.0
+extract_msg==0.36.4
+Flask==2.2.3
+geoip2==4.7.0
+httpx==0.13.3
+IPy==1.01
+maltiverse==1.1.9
+pygal==3.0.0
+python-dotenv==1.0.0
+python_dateutil==2.8.2
+gunicorn

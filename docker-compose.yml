@@ -1,0 +1,16 @@
+version: "3.8"
+
+services:
+  mhd:
+    container_name: mhd
+    build: .
+    image: mhd:latest
+    restart: unless-stopped
+    ports:
+     - "8080:8080"
+    command: --debug
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
