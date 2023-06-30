@@ -9,14 +9,29 @@ def query_hunterio(email, hunterio_key):
     response = httpx.get(url)
     if response.status_code == 200:
         hunterio_response = response.json()
-        return hunterio_response["data"]["score"] if 'score' in hunterio_response else "Not found on Hunter.io"
+        score = hunterio_response["data"]["score"]
+        gibberish = hunterio_response["data"]["gibberish"]
+        email_status = hunterio_response["data"]["status"]
+        if email_status != 'valid' or score <= 50:
+            return 'Malicious'
+        elif gibberish:
+            return 'Suspicious'
+        return "Safe"
+    return "Not Found"
 
 def query_ipqualityscore(email, ipqualityscore_key):
     url = f"https://www.ipqualityscore.com/api/json/email/{ipqualityscore_key}/{email}"
     response = httpx.get(url)
     if response.status_code == 200:
         ipquality_response = response.json()
-        return ipquality_response["fraud_score"] if 'fraud_score' in ipquality_response else "Not found on IpQualityScore"
+        fraud_score = ipquality_response["fraud_score"]
+        if fraud_score >= 75 and fraud_score < 90:
+            return 'Suspicious'
+        elif fraud_score >= 90:
+            return 'Malicious'
+        else:
+            return 'Safe'
+    return "Not Found"
 
 def query_email_services(email):
     dotenv_path = join(dirname(__file__), '.env')
@@ -38,4 +53,5 @@ def query_email_services(email):
         return results
 
     except Exception as e:
+        print(e)
         return "error"

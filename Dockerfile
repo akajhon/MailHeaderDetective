@@ -1,4 +1,6 @@
-FROM python:3.9-alpine
+FROM python:3.8
+
+ENV TZ=America/Sao_Paulo
 
 RUN adduser -D mhd
 

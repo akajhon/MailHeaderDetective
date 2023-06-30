@@ -7,8 +7,6 @@ from modules.ip_checker import query_ip_services
 from modules.url_checker import query_url_services
 from modules.email_checker import query_email_services
 from modules.hash_verify import query_hash_services
-from datetime import datetime
-from time import struct_time
 from IPy import IP
 import email
 import mimetypes

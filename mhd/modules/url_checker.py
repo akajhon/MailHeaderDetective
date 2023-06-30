@@ -7,13 +7,42 @@ from maltiverse import Maltiverse
 import concurrent.futures
 
 def query_vt(url, vt_key):
-    url_id = base64.urlsafe_b64encode(url.encode()).decode().strip("=")
-    url_vt = f"https://virustotal.com/api/v3/urls/{url_id}"
-    headers = {"accept": "application/json", "x-apikey": vt_key}
-    response = httpx.get(url_vt, headers=headers)
-    if response.status_code == 200:
-        vt_response = response.json()
-        return vt_response["data"]["attributes"]["last_analysis_stats"]["malicious"] if 'malicious' in vt_response else "Not found on VT"
+    try: 
+        url_id = base64.urlsafe_b64encode(url.encode()).decode().strip("=")
+        url_vt = f"https://virustotal.com/api/v3/urls/{url_id}"
+        headers = {"accept": "application/json", "x-apikey": vt_key}
+        response = httpx.get(url_vt, headers=headers)
+        if response.status_code == 200:
+            vt_response = response.json()
+            reputation = vt_response["data"]["attributes"]["reputation"]
+            total_votes = vt_response["data"]["attributes"]["total_votes"]
+            # verifica reputation
+            if reputation is not None:
+                if reputation >= 95:
+                    reputation_result = 'Safe'
+                elif 75 <= reputation < 95:
+                    reputation_result = 'Suspicious'
+                else:
+                    reputation_result = 'Malicious'
+            else:
+                reputation_result = "Not found"
+            # verifica votos da comunidade
+            if total_votes['malicious'] > total_votes['harmless']:
+                votes_result = 'Malicious'
+            elif total_votes['harmless'] > total_votes['malicious']:
+                votes_result = 'Safe'
+            else:
+                votes_result = 'Undetermined'
+            if reputation_result == votes_result:
+                return reputation_result
+            else:
+                if 'Undetermined' in [reputation_result, votes_result] or 'Not found' in [reputation_result, votes_result]:
+                    return 'Suspicious'
+                else:
+                    return 'Suspicious'
+        return "Not Found"
+    except Exception as e:
+        print(e)
 
 def query_phishtank(url):
     phishtank_url = 'https://checkurl.phishtank.com/checkurl/'
@@ -21,11 +50,28 @@ def query_phishtank(url):
     response = httpx.post(phishtank_url, data=phishtank_params)
     if response.status_code == 200:
         phishtank_response = response.json()
-        return phishtank_response['results']['in_database'] if 'in_database' in phishtank_response else "Not found on Phishtank"
+        in_database = phishtank_response['results']['in_database']
+        if in_database:
+            return 'Reported'
+        else:
+            return 'Not Reported'
+    return "Not Found"
 
 def query_maltiverse(url, maltiverse_api):
     maltiverse_response = maltiverse_api.url_get(url)
-    return maltiverse_response["classification"] if 'classification' in maltiverse_response else "Not found on Maltiverse"
+
+    if 'Not Found' in maltiverse_response['message']:
+        return "Not found"
+    else:
+        maltiverse_classification = maltiverse_response["classification"]
+        if maltiverse_classification == 'malicious':
+            return 'Malicious'
+        elif maltiverse_classification == 'suspicious':
+            return 'Suspicious'
+        elif maltiverse_classification == 'unknown':
+            return "Not found"
+        else:
+            return 'Safe'
 
 def query_url_services(url):
     dotenv_path = join(dirname(__file__), '.env')
@@ -49,4 +95,5 @@ def query_url_services(url):
         return results
 
     except Exception as e:
+        #print(e)
         return "error"

@@ -32,3 +32,15 @@ body {
   color: #fff;
   font-family: 'Roboto' sans-serif;
 }
+
+.red {
+  color: red;
+}
+
+.yellow {
+  color: rgb(204, 204, 0); /* amarelo mais escuro usando RGB */
+}
+
+.green {
+  color: green;
+}

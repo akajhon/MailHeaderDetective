@@ -1,10 +1,9 @@
-version: "3.8"
+version: '3.1'
 
 services:
   mhd:
     container_name: mhd
     build: .
-    image: mhd:latest
     restart: unless-stopped
     ports:
      - "8080:8080"

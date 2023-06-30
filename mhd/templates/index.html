@@ -193,10 +193,14 @@
                         <tr><th>Size(in Mb)</th><td>{{ attachment.size_mb }}</td></tr>
                         <tr><th>SHA256</th><td>{{ attachment.sha256 }}</td></tr>
                         <tr><th>MD5</th><td>{{ attachment.md5 }}</td></tr>
-                        <tr><th>HA Analysis SHA256</th><td>{{ attachment.HA_Analysis_256 }}</td></tr>
-                        <tr><th>VT Analysis SHA256</th><td>{{ attachment.VT_Analysis_256 }}</td></tr>
-                        <tr><th>HA Analysis MD5</th><td>{{ attachment.HA_Analysis_md5 }}</td></tr>
-                        <tr><th>VT Analysis MD5</th><td>{{ attachment.VT_Analysis_md5 }}</td></tr>
+                        <tr><th>HA Analysis SHA256</th><td class="{% if attachment.HA_Analysis_256 == 'Malicious' %}red{% elif attachment.HA_Analysis_256 == 'Suspicious' %}yellow{% elif attachment.HA_Analysis_256 == 'Safe' %}green{% endif %}">
+                            {{ attachment.HA_Analysis_256 }}</td></tr>
+                        <tr><th>VT Analysis SHA256</th><td class="{% if VT_Analysis_256 == 'Malicious' %}red{% elif VT_Analysis_256 == 'Suspicious' %}yellow{% elif VT_Analysis_256 == 'Safe' %}green{% endif %}">
+                            {{ attachment.VT_Analysis_256 }}</td></tr>
+                        <tr><th>HA Analysis MD5</th><td class="{% if HA_Analysis_md5 == 'Malicious' %}red{% elif HA_Analysis_md5 == 'Suspicious' %}yellow{% elif HA_Analysis_md5 == 'Safe' %}green{% endif %}">
+                            {{ attachment.HA_Analysis_md5 }}</td></tr>
+                        <tr><th>VT Analysis MD5</th><td class="{% if VT_Analysis_md5 == 'Malicious' %}red{% elif VT_Analysis_md5 == 'Suspicious' %}yellow{% elif VT_Analysis_md5 == 'Safe' %}green{% endif %}">
+                            {{ attachment.VT_Analysis_md5 }}</td></tr>
                         {% endfor %}
                         {% else %}
                         <tr><td>No attachments found</td></tr>
@@ -225,10 +229,10 @@
                             {% for ip, data in ip_data.items() %}
                                 <tr>
                                     <td>{{ ip }}</td>
-                                    <td>{{ data.abuseipdb }}</td>
-                                    <td>{{ data.ipqualityscore }}</td>
-                                    <td>{{ data.vt }}</td>
-                                    <td>{{ data.maltiverse }}</td>
+                                    <td class="{% if data.abuseipdb == 'Malicious' %}red{% elif data.abuseipdb == 'Suspicious' %}yellow{% elif data.abuseipdb == 'Safe' %}green{% endif %}">{{ data.abuseipdb }}</td>
+                                    <td class="{% if data.ipqualityscore == 'Malicious' %}red{% elif data.ipqualityscore == 'Suspicious' %}yellow{% elif data.ipqualityscore == 'Safe' %}green{% endif %}">{{ data.ipqualityscore }}</td>
+                                    <td class="{% if data.vt == 'Malicious' %}red{% elif data.vt == 'Suspicious' %}yellow{% elif data.vt == 'Safe' %}green{% endif %}">{{ data.vt }}</td>
+                                    <td class="{% if data.maltiverse == 'Malicious' %}red{% elif data.maltiverse == 'Suspicious' %}yellow{% elif data.maltiverse == 'Safe' %}green{% endif %}">{{ data.maltiverse }}</td>
                                 </tr>
                             {% endfor %}
                         {% else %}
@@ -258,8 +262,8 @@
                                 {% for email, data in email_data.items() %}
                                     <tr>
                                         <td>{{ email }}</td>
-                                        <td>{{ data.ipqualityscore }}</td>
-                                        <td>{{ data.hunterio }}</td>
+                                        <td class="{% if data.ipqualityscore == 'Malicious' %}red{% elif data.ipqualityscore == 'Suspicious' %}yellow{% elif data.ipqualityscore == 'Safe' %}green{% endif %}">{{ data.ipqualityscore }}</td>
+                                        <td class="{% if data.hunterio == 'Malicious' %}red{% elif data.hunterio == 'Suspicious' %}yellow{% elif data.hunterio == 'Safe' %}green{% endif %}">{{ data.hunterio }}</td>
                                     </tr>
                                 {% endfor %}
                             {% else %}
@@ -289,9 +293,9 @@
                                 {% for url, data in url_data.items() %}
                                     <tr>
                                         <td>{{ url }}</td>
-                                        <td>{{ data.vt }}</td>
-                                        <td>{{ data.phishtank }}</td>
-                                        <td>{{ data.maltiverse }}</td>
+                                        <td class="{% if data.vt == 'Malicious' %}red{% elif data.vt == 'Suspicious' %}yellow{% elif data.vt == 'Safe' %}green{% endif %}">{{ data.vt }}</td>
+                                        <td class="{% if data.phishtank == 'Reported' %}red{% elif data.phishtank == 'Not Reported' %}green{% endif %}">{{ data.phishtank }}</td>
+                                        <td class="{% if data.maltiverse == 'Malicious' %}red{% elif data.maltiverse == 'Suspicious' %}yellow{% elif data.maltiverse == 'Safe' %}green{% endif %}">{{ data.maltiverse }}</td>
                                     </tr>
                                 {% endfor %}
                             {% else %}

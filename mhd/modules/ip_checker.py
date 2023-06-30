@@ -11,14 +11,28 @@ def query_abuseipdb(ip, abuseipdb_key):
     response = httpx.get(url, headers=headers)
     if response.status_code == 200:
         abuseipdb_response = response.json()
-        return abuseipdb_response["data"]["abuseConfidenceScore"] if 'abuseConfidenceScore' in abuseipdb_response else "Not found on AbuseIPDB"
+        confidence_score = abuseipdb_response["data"]["abuseConfidenceScore"]
+        if confidence_score > 1 and confidence_score <=25:
+            return 'Suspicious'
+        elif confidence_score > 25 and confidence_score <=100:
+            return 'Malicious'
+        else:
+            return 'Safe'
+    return "Not Found"
 
 def query_ipqualityscore(ip, ipqualityscore_key):
     url = f"https://ipqualityscore.com/api/json/ip/{ipqualityscore_key}/{ip}"
     response = httpx.get(url)
     if response.status_code == 200:
         ipquality_response = response.json()
-        return ipquality_response["fraud_score"] if 'fraud_score' in ipquality_response else "Not found on IpQualityScore"
+        fraud_score = ipquality_response["fraud_score"]
+        if fraud_score >= 75 and fraud_score < 88:
+            return 'Suspicious'
+        elif fraud_score >= 88:
+            return 'Malicious'
+        else:
+            return 'Safe'
+    return "Not Found"
 
 def query_vt(ip, vt_key):
     url = f"https://virustotal.com/api/v3/ip_addresses/{ip}"
@@ -26,11 +40,45 @@ def query_vt(ip, vt_key):
     response = httpx.get(url, headers=headers)
     if response.status_code == 200:
         vt_response = response.json()
-        return vt_response["data"]["attributes"]["reputation"] if 'reputation' in vt_response else "Not found on VT"
+        reputation = vt_response["data"]["attributes"]["reputation"]
+        total_votes = vt_response["data"]["attributes"]["total_votes"]
+        # verifica reputation
+        if reputation is not None:
+            if reputation >= 95:
+                reputation_result = 'Safe'
+            elif 75 <= reputation < 95:
+                reputation_result = 'Suspicious'
+            else:
+                reputation_result = 'Malicious'
+        else:
+            reputation_result = "Not Found"
+        # verifica votos da comunidade
+        if total_votes['malicious'] > total_votes['harmless']:
+            votes_result = 'Malicious'
+        elif total_votes['harmless'] > total_votes['malicious']:
+            votes_result = 'Safe'
+        else:
+            votes_result = 'Undetermined'
+        if reputation_result == votes_result:
+            return reputation_result
+        else:
+            if 'Undetermined' in [reputation_result, votes_result] or 'Not found on VT' in [reputation_result, votes_result]:
+                return 'Suspicious'
+            else:
+                return 'Suspicious'
+    return "Not Found"
 
 def query_maltiverse(ip, maltiverse_api):
     maltiverse_response = maltiverse_api.ip_get(ip)
-    return maltiverse_response["classification"] if 'classification' in maltiverse_response else "Not Found on Maltiverse"
+    maltiverse_classification = maltiverse_response["classification"]
+    if maltiverse_classification == 'malicious':
+        return 'Malicious'
+    elif maltiverse_classification == 'suspicious':
+        return 'Suspicious'
+    elif maltiverse_classification == 'unknown':
+        return "Not Found"
+    else:
+        return 'Safe'
 
 def query_ip_services(ip):
     dotenv_path = join(dirname(__file__), '.env')
@@ -58,4 +106,5 @@ def query_ip_services(ip):
         return results
 
     except Exception as e:
+        print(e)
         return "error"
