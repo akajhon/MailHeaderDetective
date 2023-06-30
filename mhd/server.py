@@ -3,11 +3,15 @@ from flask import render_template
 from flask import request
 from email.parser import HeaderParser
 from pygal.style import Style
-from mhd.modules.ip_checker import query_ip_services
-from mhd.modules.url_checker import query_url_services
-from mhd.modules.email_checker import query_email_services
+from modules.ip_checker import query_ip_services
+from modules.url_checker import query_url_services
+from modules.email_checker import query_email_services
+from modules.hash_verify import query_hash_services
+from datetime import datetime
+from time import struct_time
 from IPy import IP
 import email
+import mimetypes
 import ipaddress
 import dns.resolver
 import time
@@ -17,11 +21,12 @@ import pygal
 import geoip2.database
 import argparse
 import extract_msg
+import hashlib
+import math
 
 app = Flask(__name__)
 reader = geoip2.database.Reader(
     '%s/data/GeoLite2-Country.mmdb' % app.static_folder)
-
 
 @app.context_processor
 def utility_processor():
@@ -35,14 +40,19 @@ def utility_processor():
         if ip:
             ip = ip[0]  # take the 1st ip and ignore the rest
             if IP(ip).iptype() == 'PUBLIC':
-                r = reader.country(ip).country
-                if r.iso_code and r.name:
+                try:
+                    r = reader.country(ip).country
+                    if r.iso_code and r.name:
+                        return {
+                            'iso_code': r.iso_code.lower(),
+                            'country_name': r.name
+                        }
+                except geoip2.errors.AddressNotFoundError:
                     return {
-                        'iso_code': r.iso_code.lower(),
-                        'country_name': r.name
-                    }
+                            'iso_code': None,
+                            'country_name': None
+                        }
     return dict(country=getCountryForIP)
-
 
 @app.context_processor
 def utility_processor():
@@ -69,7 +79,6 @@ def dateParser(line):
         if r:
             r = dateutil.parser.parse(r[0])
     return r
-
 
 def getHeaderVal(h, data, rex='\s*(.*?)\n\S+:\s'):
     r = re.findall('%s:%s' % (h, rex), data, re.X | re.DOTALL | re.I)
@@ -158,6 +167,62 @@ def get_text_bodies(message):
         bodies.append(message.get_payload(decode=True).decode())
     return bodies
 
+def get_attachments(mail_file, msg_content):
+    attachments_list = []
+    if mail_file.filename.endswith(".msg"):
+        msg_content = extract_msg.Message(mail_file)
+        attachments_list = []
+        for attachment in msg_content.attachments:
+            attachment_filename = attachment.longFilename
+            content_type, _ = mimetypes.guess_type(attachment_filename)
+            attachment_data = attachment.data
+            sha256_hash = hashlib.sha256(attachment_data).hexdigest()
+            md5_hash = hashlib.md5(attachment_data).hexdigest()
+            size_mb = math.ceil(len(attachment_data) / (1024 * 1024))
+            analysis_256 = query_hash_services(sha256_hash)
+            analysis_md5 = query_hash_services(md5_hash)
+            attachments = {
+                "filename": attachment_filename,
+                "content_type": content_type,
+                "sha256": sha256_hash,
+                "md5": md5_hash,
+                "size_mb": size_mb,
+                "HA_Analysis_256": analysis_256.get('ha'),
+                "VT_Analysis_256": analysis_256.get('vt'),
+                "HA_Analysis_md5": analysis_md5.get('ha'),
+                "VT_Analysis_md5": analysis_md5.get('vt')
+            }
+            attachments_list.append(attachments)
+
+    elif mail_file.filename.endswith(".eml"):
+        attachment_parser = email.message_from_string(msg_content)
+        for part in attachment_parser.walk():
+            disposition = part.get("Content-Disposition")
+            if disposition and disposition.startswith("attachment"):
+                attachment_filename = part.get_filename()
+                content_type = part.get_content_type()
+                attachment_data = part.get_payload(decode=True)
+                sha256_hash = hashlib.sha256(attachment_data).hexdigest()
+                md5_hash = hashlib.md5(attachment_data).hexdigest()
+                size_mb = math.ceil(len(attachment_data) / (1024 * 1024))
+                analysis_256 = query_hash_services(sha256_hash)
+                analysis_md5 = query_hash_services(md5_hash)
+                attachments = {
+                    "filename": attachment_filename,
+                    "content_type": content_type,
+                    "sha256": sha256_hash,
+                    "md5": md5_hash,
+                    "size_mb": size_mb,
+                    "HA_Analysis_256": analysis_256.get('ha'),
+                    "VT_Analysis_256": analysis_256.get('vt'),
+                    "HA_Analysis_md5": analysis_md5.get('ha'),
+                    "VT_Analysis_md5": analysis_md5.get('vt')
+                }
+                attachments_list.append(attachments)
+    else:
+        return "Filetype not Supported..."
+    
+    return attachments_list
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -166,10 +231,12 @@ def index():
         if mail_file.filename.endswith(".msg"):
             msg_content = extract_msg.Message(mail_file)
             mail_data = msg_content.header.as_string()
+            attachments_list = get_attachments(mail_file, msg_content)
             bodies = get_text_bodies(msg_content)
         elif mail_file.filename.endswith(".eml"):
             msg_content = email.message_from_bytes(mail_file.read())
             mail_data = msg_content.as_string()
+            attachments_list = get_attachments(mail_file, mail_data)
             bodies = [part.get_payload() for part in msg_content.walk() if part.get_content_type() == 'text/plain']
         r = {}
         n = HeaderParser().parsestr(mail_data)
@@ -227,7 +294,7 @@ def index():
                         (?:\sid\s|$)
                         |\sid\s
                     )""", line[0], re.DOTALL | re.X)
-
+                
             delay = (org_time - next_time).seconds
             if delay < 0:
                 delay = 0
@@ -287,22 +354,6 @@ def index():
 
         ip_addresses, email_addresses, urls_found = display_informations(n, bodies)
 
-        attachment_parser = email.message_from_string(mail_data)
-        attachments_list = []
-        for part in attachment_parser.walk():
-            disposition = part.get("Content-Disposition")
-            if disposition and disposition.startswith("attachment"):
-                attachment_filename = part.get_filename()
-                content_type = part.get_content_type()
-                attachments = {
-                    'filename': attachment_filename,
-                    'content_type': content_type
-                }
-                attachments_list.append(attachments)
-                #if attachment_filename:
-                #    with open('./temp/' + attachment_filename, 'wb') as file:
-                #        file.write(part.get_payload(decode=True))
-                        
         ip_data = {}
         for ip in ip_addresses:
             ip_data[ip] = query_ip_services(ip)

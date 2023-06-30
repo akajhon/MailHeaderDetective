@@ -180,34 +180,31 @@
             </div>
         </div>
         <div class="panel panel-default" style="margin-top: 10px;">
-    <div class="panel-heading">
-        <h3 class="panel-title">Attachments</h3>
-    </div>
-    <div class="table-responsive">
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Filename</th>
-                    <th>Content-Type</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% if attachments %}
-                {% for attachment in attachments %}
-                <tr>
-                    <td>{{ attachment.filename }}</td>
-                    <td>{{ attachment.content_type }}</td>
-                </tr>
-                {% endfor %}
-                {% else %}
-                <tr>
-                    <td colspan="2">No attachments found</td>
-                </tr>
-                {% endif %}
-            </tbody>
-        </table>
-    </div>
-</div>
+            <div class="panel-heading">
+                <h3 class="panel-title">Attachments</h3>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <tbody>
+                        {% if attachments %}
+                        {% for attachment in attachments %}
+                        <tr><th>Filename</th><td>{{ attachment.filename }}</td></tr>
+                        <tr><th>Content-Type</th><td>{{ attachment.content_type }}</td></tr>
+                        <tr><th>Size(in Mb)</th><td>{{ attachment.size_mb }}</td></tr>
+                        <tr><th>SHA256</th><td>{{ attachment.sha256 }}</td></tr>
+                        <tr><th>MD5</th><td>{{ attachment.md5 }}</td></tr>
+                        <tr><th>HA Analysis SHA256</th><td>{{ attachment.HA_Analysis_256 }}</td></tr>
+                        <tr><th>VT Analysis SHA256</th><td>{{ attachment.VT_Analysis_256 }}</td></tr>
+                        <tr><th>HA Analysis MD5</th><td>{{ attachment.HA_Analysis_md5 }}</td></tr>
+                        <tr><th>VT Analysis MD5</th><td>{{ attachment.VT_Analysis_md5 }}</td></tr>
+                        {% endfor %}
+                        {% else %}
+                        <tr><td>No attachments found</td></tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
         <div class="panel panel-default" style="margin-top: 10px;">
             <div class="panel-heading">
                 <h3 class="panel-title">External IP Addresses Found</h3>
