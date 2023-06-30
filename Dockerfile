@@ -2,7 +2,7 @@ FROM python:3.9-alpine
 
 RUN adduser -D mhd
 
-COPY requirements.txt ./tmp/
+COPY /mhd/requirements.txt ./tmp/
 RUN apk add --no-cache gcc musl-dev && \
     pip install --no-cache-dir -r /tmp/requirements.txt
 
