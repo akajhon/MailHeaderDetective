@@ -26,10 +26,17 @@ body {
   font-family: 'Roboto' sans-serif;
 }
 
-.btn-magenta:hover {
+.btn-magenta:hover, .btn-magenta:focus  {
   background-color: #ff3d8f;
   border-color: #ff3d8f;
   color: #fff;
+  font-family: 'Roboto' sans-serif;
+}
+
+.btn-magenta:active{
+  color: #fff;
+  background-color: #ff3d8f;
+  border-color: #ff3d8f;
   font-family: 'Roboto' sans-serif;
 }
 
