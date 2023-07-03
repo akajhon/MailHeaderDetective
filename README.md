@@ -3,122 +3,121 @@
 </p>
 
 # MailHeaderDetective
- 
 
-O Mail Header Detective é uma ferramenta de análise de cabeçalhos de e-mails escrita em Python. Foi projetada para auxiliar na investigação de incidentes de segurança relacionados a e-mails, facilitando a análise e a coleta de informações de cabeçalhos de e-mails.
+Mail Header Detective is an email header analysis tool written in Python. It's designed to assist in the investigation of security incidents related to emails by making the analysis and gathering of information from email headers easier.
 
-## Funcionalidades
+## Features
 
-O Mail Header Detective é capaz de:
+Mail Header Detective is able to:
 
-- Analisar o cabeçalho de um e-mail e extrair informações pertinentes.
-- Verificar a reputação dos IPs encontrados nos cabeçalhos, consultando várias APIs, como VirusTotal, Hybrid-Analysis, Maltiverse e PhishTank.
-- Identificar atrasos entre cada salto na entrega de um e-mail, analisando os dados de timestamp no cabeçalho do e-mail. Isso pode ajudar a identificar quaisquer atrasos anormais ou possíveis problemas no processo de entrega do e-mail.
-- Rastrear a origem de um e-mail. Ao analisar cuidadosamente os campos "Received" no cabeçalho do e-mail, a ferramenta é capaz de identificar o endereço IP e, consequentemente, o servidor de onde o e-mail se originou.
-- Identificar o país de origem de um e-mail, mapeando o endereço IP para o seu país. Isso pode ser particularmente útil para identificar e-mails de spam ou em investigações de forense digital.
-- Executar em uma interface gráfica de usuário para facilitar o uso.
-- Realizar integrações com APIs. O MHD pode identificar endereços IP, endereços de e-mail e URLs nos metadados do e-mail e enviá-los para serviços como VirusTotal, Hunter.io, Maltiverse, CheckPhish, Phishtank, entre outros, para uma análise detalhada.
+- Analyze an email header and extract pertinent information.
+- Check the reputation of the IPs found in the headers by querying various APIs such as VirusTotal, Hybrid-Analysis, Maltiverse, and PhishTank.
+- Identify delays between each hop in an email's delivery by analyzing the timestamp data in the email header. This can help identify any abnormal delays or potential issues in the email delivery process.
+- Trace the origin of an email. By carefully analyzing the "Received" fields in the email header, the tool is capable of identifying the IP address and consequently the server from which the email originated.
+- Identify the country of origin of an email by mapping the IP address to its country. This can be particularly useful for identifying spam emails or in digital forensics investigations.
+- Operate on a user interface to facilitate usage.
+- Perform API integrations. MHD can identify IP addresses, email addresses, and URLs in the email metadata and send them to services such as VirusTotal, Hunter.io, Maltiverse, CheckPhish, Phishtank, and others for a detailed analysis.
 
-Em resumo, o "Mail Header Detective" é uma poderosa ferramenta que pode ajudar a dissecar cabeçalhos de e-mail complexos, fornecendo insights úteis e informações valiosas sobre a jornada do e-mail do remetente ao destinatário.
+In essence, the "Mail Header Detective" is a powerful tool that can aid in dissecting complex email headers, providing useful insights and valuable information about the email's journey from the sender to the recipient.
 
-## Requisitos
+## Requirements
 
-Para executar o Mail Header Detective, você precisa:
+To run the Mail Header Detective, you need:
 
 - Python 3.8+
-- Pacotes Python: httpx, os, python-dotenv, concurrent.futures, dnspython, extract_msg, Flask, geoip2, IPy, maltiverse, pygal, python_dateutil e gunicorn
+- Python Packages: httpx, os, python-dotenv, concurrent.futures, dnspython, extract_msg, Flask, geoip2, IPy, maltiverse, pygal, python_dateutil, and gunicorn
 
-## Rodando Localmente
+## Running Locally
 
-Clone o repositório para sua máquina local:
+Clone the repository to your local machine:
 
 ```bash
 git clone https://github.com/akajhon/MailHeaderDetective.git
 ```
 
-Navegue até o diretório do projeto e instale as dependências necessárias:
+Navigate to the project directory and install the necessary dependencies:
 
 ```bash
 cd MailHeaderDetective
 pip install -r requirements.txt
 ```
 
-Execute o script principal:
+Run the main script:
 
 ```bash
 python server.py -d
 ```
 
-Acesse a aplicação:
+Access the application:
 
 ```bash
 https://127.0.0.1:8080
 ```
 
-## Rodando com Docker-Compose
+## Running with Docker-Compose
 
-Clone o repositório para sua máquina local:
+Clone the repository to your local machine:
 
 ```bash
 git clone https://github.com/akajhon/MailHeaderDetective.git
 ```
 
-Navegue até o diretório do projeto:
+Navigate to the project directory:
 
 ```bash
 cd MailHeaderDetective
 ```
 
-Inicie o container com o comando:
+Start the container with the command:
 
 ```bash
 docker-compose up -d
 ```
 
-Acesse a aplicação:
+Access the application:
 
 ```bash
 https://127.0.0.1:8080
 ```
 
-## Chaves de API
+## API Keys
 
-Para uma execução completa, é necessário criar o arquivo .env para armazenar as chaves das API's:
+For a complete execution, it is necessary to create the .env file to store the API keys:
 
 ```bash
 touch .env
 ```
 
-O arquivo deve ser colocado dentro do diretório `mhd/modules` e deve ter a seguinte estrutura:
+The file should be placed inside the `mhd/modules` directory and should have the following structure:
 
 ```bash
-ABUSEIPDB = <sua_chave_de_API>
-IPQUALITYSCORE = <sua_chave_de_API>
-VIRUSTOTAL = <sua_chave_de_API>
-MALTIVERSE = <sua_chave_de_API>
-HYBRIDANALYSIS = <sua_chave_de_API>
+ABUSEIPDB = <your_API_key>
+IPQUALITYSCORE = <your_API_key>
+VIRUSTOTAL = <your_API_key>
+MALTIVERSE = <your_API_key>
+HYBRIDANALYSIS = <your_API_key>
 ```
 
-## Inspiração
+## Inspiration
 
-Este projeto foi criado com o intuito de melhorar e continuar o desenvolvimento do projeto `email-header-analyzer`, disponível em:
+This project was created with the intention of improving and continuing the development of the `email-header-analyzer` project, available at:
 
 ```bash
 https://github.com/cyberdefenders/email-header-analyzer
 ```
 
-## Como usar
+## How to Use
 
-Para usar o Mail Header Detective, você precisa fornecer o arquivo .msg ou .eml do e-mail que deseja analisar.
+To use Mail Header Detective, you need to provide the .msg or .eml file of the email you wish to analyze.
 
-## Contribuindo
+## Contributing
 
-Contribuições para o Mail Header Detective são bem-vindas! Sinta-se à vontade para abrir um problema ou enviar um Pull Request.
+Contributions to the Mail Header Detective are welcome! Feel free to open an issue or submit a Pull Request.
 
-## Licença
+## License
 
-O Mail Header Detective é licenciado sob a licença MIT.
+Mail Header Detective is licensed under the MIT License.
 
-## Contato
+## Contact
 
-Se você tiver alguma dúvida ou feedback, pode entrar em contato comigo através do GitHub!
+If you have any questions or feedback, feel free to reach out through GitHub!
