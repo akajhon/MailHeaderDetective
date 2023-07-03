@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="https://github.com/akajhon/MailHeaderDetective/blob/main/readme/detective_big.png" alt="Mail Header Detective logo">
+    <img src="https://github.com/akajhon/MailHeaderDetective/blob/main/readme/detective_big.png" alt="Mail Header Detective logo" width="250" height="250">
 </p>
 
 # MailHeaderDetective
