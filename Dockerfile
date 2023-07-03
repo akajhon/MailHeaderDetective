@@ -1,11 +1,12 @@
-FROM python:3.8
+FROM python:3.10
 
 ENV TZ=America/Sao_Paulo
 
-RUN adduser -D mhd
+RUN adduser mhd
 
 COPY /mhd/requirements.txt ./tmp/
-RUN apk add --no-cache gcc musl-dev && \
+
+RUN apt-get update && apt-get install -y gcc musl-dev && \
     pip install --no-cache-dir -r /tmp/requirements.txt
 
 WORKDIR /usr/src/mhd

@@ -16,7 +16,6 @@ def query_vt(url, vt_key):
             vt_response = response.json()
             reputation = vt_response["data"]["attributes"]["reputation"]
             total_votes = vt_response["data"]["attributes"]["total_votes"]
-            # verifica reputation
             if reputation is not None:
                 if reputation >= 95:
                     reputation_result = 'Safe'
@@ -25,8 +24,7 @@ def query_vt(url, vt_key):
                 else:
                     reputation_result = 'Malicious'
             else:
-                reputation_result = "Not found"
-            # verifica votos da comunidade
+                reputation_result = "Not Found"
             if total_votes['malicious'] > total_votes['harmless']:
                 votes_result = 'Malicious'
             elif total_votes['harmless'] > total_votes['malicious']:
@@ -36,42 +34,51 @@ def query_vt(url, vt_key):
             if reputation_result == votes_result:
                 return reputation_result
             else:
-                if 'Undetermined' in [reputation_result, votes_result] or 'Not found' in [reputation_result, votes_result]:
+                if 'Undetermined' in [reputation_result, votes_result] or 'Not Found' in [reputation_result, votes_result]:
                     return 'Suspicious'
                 else:
                     return 'Suspicious'
         return "Not Found"
     except Exception as e:
-        print(e)
+        print(f"[!] Error in query_vt: {e}")
+        return "Error"
 
 def query_phishtank(url):
-    phishtank_url = 'https://checkurl.phishtank.com/checkurl/'
-    phishtank_params = {'url': {url}, 'format': 'json'}
-    response = httpx.post(phishtank_url, data=phishtank_params)
-    if response.status_code == 200:
-        phishtank_response = response.json()
-        in_database = phishtank_response['results']['in_database']
-        if in_database:
-            return 'Reported'
-        else:
-            return 'Not Reported'
-    return "Not Found"
+    try:
+        phishtank_url = 'https://checkurl.phishtank.com/checkurl/'
+        phishtank_params = {'url': {url}, 'format': 'json'}
+        response = httpx.post(phishtank_url, data=phishtank_params)
+        if response.status_code == 200:
+            phishtank_response = response.json()
+            in_database = phishtank_response['results']['in_database']
+            if in_database:
+                return 'Reported'
+            else:
+                return 'Not Reported'
+        return "Not Found"
+    except Exception as e:
+        print(f"[!] Error in query_phishtank: {e}")
+        return "Error"
 
 def query_maltiverse(url, maltiverse_api):
-    maltiverse_response = maltiverse_api.url_get(url)
+    try:
+        maltiverse_response = maltiverse_api.url_get(url)
 
-    if 'Not Found' in maltiverse_response['message']:
-        return "Not found"
-    else:
-        maltiverse_classification = maltiverse_response["classification"]
-        if maltiverse_classification == 'malicious':
-            return 'Malicious'
-        elif maltiverse_classification == 'suspicious':
-            return 'Suspicious'
-        elif maltiverse_classification == 'unknown':
-            return "Not found"
+        if 'Not Found' in maltiverse_response['message']:
+            return "Not Found"
         else:
-            return 'Safe'
+            maltiverse_classification = maltiverse_response["classification"]
+            if maltiverse_classification == 'malicious':
+                return 'Malicious'
+            elif maltiverse_classification == 'suspicious':
+                return 'Suspicious'
+            elif maltiverse_classification == 'unknown':
+                return "Not Found"
+            else:
+                return 'Safe'
+    except Exception as e:
+        print(f"[!] Error in query_maltiverse: {e}")
+        return "Error"
 
 def query_url_services(url):
     dotenv_path = join(dirname(__file__), '.env')
@@ -95,5 +102,5 @@ def query_url_services(url):
         return results
 
     except Exception as e:
-        #print(e)
-        return "error"
+        print(f"[!] Error in query_url_services: {e}")
+        return "Error"

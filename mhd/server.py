@@ -36,7 +36,7 @@ def utility_processor():
             (?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d))\b""", re.X)
         ip = ipv4_address.findall(line)
         if ip:
-            ip = ip[0]  # take the 1st ip and ignore the rest
+            ip = ip[0]
             if IP(ip).iptype() == 'PUBLIC':
                 try:
                     r = reader.country(ip).country
@@ -67,7 +67,6 @@ def utility_processor():
             if num
         )
     return dict(duration=duration)
-
 
 def dateParser(line):
     try:
@@ -116,15 +115,12 @@ def display_informations(metadata, content):
     if not isinstance(content, str):
         content = str(content)
     
-    # Search for IP addresses in the metadata
     ip_pattern = r"(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})"
     ip_addresses = []
     for key, value in metadata.items():
         ip_addresses += [ip for ip in re.findall(ip_pattern, str(value)) if not is_internal_ip(ip) and ip[0] != '0']
-    # Search for IP addresses in the content
     ip_addresses += [ip for ip in re.findall(ip_pattern, content) if not is_internal_ip(ip) and ip[0] != '0']
 
-    # Search for email addresses in the metadata
     email_pattern = r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}"
     email_addresses = []
     headers = ['Return-Path', 'From', 'To', 'CC']
@@ -132,7 +128,6 @@ def display_informations(metadata, content):
         if header in metadata:
             matches = re.findall(email_pattern, str(metadata[header]))
             email_addresses.extend(matches)
-    # Search for email addresses in the content
     matches = re.findall(email_pattern, content)
     email_addresses.extend(matches)
 
@@ -141,7 +136,6 @@ def display_informations(metadata, content):
     for key, value in metadata.items():
         urls = re.findall(url_pattern, str(value))
         urls_found += [url.strip(" >") for url in urls]
-    # Search for URLs in the content
     for match in re.finditer(url_pattern, content):
         url = match.group()
         clean_url = re.sub(r'^https?://', '', url).split("/")[0].split("]")[0]
@@ -324,7 +318,6 @@ def index():
             background='transparent',
             plot_background='transparent',
             font_family='googlefont:Open Sans',
-            # title_font_size=12,
         )
         line_chart = pygal.HorizontalBar(
             style=custom_style, height=250, legend_at_bottom=True,
@@ -372,7 +365,6 @@ def index():
             attachments=attachments_list)
     else:
         return render_template('index.html')
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Mail Header Analyser")

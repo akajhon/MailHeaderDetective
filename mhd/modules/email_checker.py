@@ -5,33 +5,41 @@ from dotenv import load_dotenv
 import concurrent.futures
 
 def query_hunterio(email, hunterio_key):
-    url = f"https://api.hunter.io/v2/email-verifier?email={email}&api_key={hunterio_key}"
-    response = httpx.get(url)
-    if response.status_code == 200:
-        hunterio_response = response.json()
-        score = hunterio_response["data"]["score"]
-        gibberish = hunterio_response["data"]["gibberish"]
-        email_status = hunterio_response["data"]["status"]
-        if email_status != 'valid' or score <= 50:
-            return 'Malicious'
-        elif gibberish:
-            return 'Suspicious'
-        return "Safe"
-    return "Not Found"
+    try:
+        url = f"https://api.hunter.io/v2/email-verifier?email={email}&api_key={hunterio_key}"
+        response = httpx.get(url)
+        if response.status_code == 200:
+            hunterio_response = response.json()
+            score = hunterio_response["data"]["score"]
+            gibberish = hunterio_response["data"]["gibberish"]
+            email_status = hunterio_response["data"]["status"]
+            if email_status != 'valid' or score <= 50:
+                return 'Malicious'
+            elif gibberish:
+                return 'Suspicious'
+            return "Safe"
+        return "Not Found"
+    except Exception as e:
+        print(f"[!] Error in query_hunterio: {e}")
+        return "Error"
 
 def query_ipqualityscore(email, ipqualityscore_key):
-    url = f"https://www.ipqualityscore.com/api/json/email/{ipqualityscore_key}/{email}"
-    response = httpx.get(url)
-    if response.status_code == 200:
-        ipquality_response = response.json()
-        fraud_score = ipquality_response["fraud_score"]
-        if fraud_score >= 75 and fraud_score < 90:
-            return 'Suspicious'
-        elif fraud_score >= 90:
-            return 'Malicious'
-        else:
-            return 'Safe'
-    return "Not Found"
+    try:
+        url = f"https://www.ipqualityscore.com/api/json/email/{ipqualityscore_key}/{email}"
+        response = httpx.get(url)
+        if response.status_code == 200:
+            ipquality_response = response.json()
+            fraud_score = ipquality_response["fraud_score"]
+            if fraud_score >= 75 and fraud_score < 90:
+                return 'Suspicious'
+            elif fraud_score >= 90:
+                return 'Malicious'
+            else:
+                return 'Safe'
+        return "Not Found"
+    except Exception as e:
+        print(f"[!] Error in query_ipqualityscore: {e}")
+        return "Error"
 
 def query_email_services(email):
     dotenv_path = join(dirname(__file__), '.env')
@@ -53,5 +61,5 @@ def query_email_services(email):
         return results
 
     except Exception as e:
-        print(e)
-        return "error"
+        print(f"[!] Error in query_email_services: {e}")
+        return "Error"
