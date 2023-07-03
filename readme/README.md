@@ -1,7 +1,9 @@
 <p align="center">
-    ![Mail Header Detective logo(https://github.com/akajhon/MailHeaderDetective/blob/main/mhd/static/imgs/detective_big.png)
-    # MailHeaderDetective
+    <img src="https://github.com/akajhon/MailHeaderDetective/blob/main/readme/detective_logo.png" alt="Mail Header Detective logo">
 </p>
+
+# MailHeaderDetective
+ 
 
 O Mail Header Detective é uma ferramenta de análise de cabeçalhos de e-mails escrita em Python. Foi projetada para auxiliar na investigação de incidentes de segurança relacionados a e-mails, facilitando a análise e a coleta de informações de cabeçalhos de e-mails.
 
