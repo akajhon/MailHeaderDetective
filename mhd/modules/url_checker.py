@@ -63,19 +63,15 @@ def query_phishtank(url):
 def query_maltiverse(url, maltiverse_api):
     try:
         maltiverse_response = maltiverse_api.url_get(url)
-
-        if 'Not Found' in maltiverse_response['message']:
-            return "Not Found"
+        maltiverse_classification = maltiverse_response['classification']
+        if maltiverse_classification == 'malicious':
+            return "Malicious"
+        elif maltiverse_classification == 'suspicious':
+            return "Suspicious"
+        elif maltiverse_classification == 'neutral':
+            return "Neutral"
         else:
-            maltiverse_classification = maltiverse_response["classification"]
-            if maltiverse_classification == 'malicious':
-                return 'Malicious'
-            elif maltiverse_classification == 'suspicious':
-                return 'Suspicious'
-            elif maltiverse_classification == 'unknown':
-                return "Not Found"
-            else:
-                return 'Safe'
+            return 'Safe'
     except Exception as e:
         print(f"[!] Error in query_maltiverse: {e}")
         return "Error"
