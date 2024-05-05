@@ -83,11 +83,11 @@ def query_maltiverse(ip, maltiverse_api):
         maltiverse_response = maltiverse_api.ip_get(ip)
         maltiverse_classification = maltiverse_response["classification"]
         if maltiverse_classification == 'malicious':
-            return 'Malicious'
+            return "Malicious"
         elif maltiverse_classification == 'suspicious':
-            return 'Suspicious'
-        elif maltiverse_classification == 'unknown':
-            return "Not Found"
+            return "Suspicious"
+        elif maltiverse_classification == 'neutral':
+            return "Neutral"
         else:
             return 'Safe'
     except Exception as e:
